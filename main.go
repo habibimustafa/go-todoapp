@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -14,21 +15,32 @@ import (
 	"strconv"
 )
 
-var (
-	DBUser string = os.Getenv("DB_USER")
-	DBPass string = os.Getenv("DB_PASSWORD")
-	DBName string = os.Getenv("DB_NAME")
-)
-
-var db, _ = gorm.Open(
-	"mysql",
-	DBUser+":"+DBPass+"@/"+DBName+"?charset=utf8&parseTime=True&loc=Local",
-)
+var db *gorm.DB
+var DBUser string
+var DBPass string
+var DBName string
 
 type TodoItemModel struct {
 	Id          int `gorm:"primary_key"`
 	Description string
 	Completed   bool
+}
+
+func Init() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatalf("Error getting env, not coming through %v", err)
+	}
+
+	DBUser = os.Getenv("DB_USER")
+	DBPass = os.Getenv("DB_PASSWORD")
+	DBName = os.Getenv("DB_NAME")
+
+	db, _ = gorm.Open(
+		"mysql",
+		DBUser+":"+DBPass+"@/"+DBName+"?charset=utf8&parseTime=True&loc=Local",
+	)
 }
 
 func Homepage(res http.ResponseWriter, _ *http.Request) {
@@ -119,6 +131,8 @@ func GetTodoItems(completed bool) interface{} {
 }
 
 func main() {
+	Init()
+
 	defer db.Close()
 
 	//db.Debug().DropTableIfExists(&TodoItemModel{})
