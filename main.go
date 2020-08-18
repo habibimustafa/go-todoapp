@@ -66,7 +66,7 @@ func GetCompletedItems(res http.ResponseWriter, _ *http.Request) {
 }
 
 func GetUncompletedItems(res http.ResponseWriter, _ *http.Request) {
-	log.Info("Get completed todo items")
+	log.Info("Get uncompleted todo items")
 	UncompletedTodoItems := GetTodoItems(false)
 	res.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(res).Encode(UncompletedTodoItems)
